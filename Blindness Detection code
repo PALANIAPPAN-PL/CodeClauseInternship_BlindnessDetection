@@ -1,0 +1,40 @@
+import cv2
+import numpy as np
+import tkinter as tk
+from tkinter import filedialog
+from PIL import Image, ImageTk
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+def detect_faces(image_path):
+    image = cv2.imread(image_path)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    return faces
+
+def process_image():
+    file_path = filedialog.askopenfilename()
+    if file_path:
+        faces = detect_faces(file_path)
+        original_image = cv2.imread(file_path)
+        for (x, y, w, h) in faces:
+            cv2.rectangle(original_image, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        display_image(original_image)
+
+def display_image(image):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = Image.fromarray(image)
+    image = ImageTk.PhotoImage(image)
+    panel.config(image=image)
+    panel.image = image
+
+root = tk.Tk()
+root.title("Blindness Detection")
+
+browse_button = tk.Button(root, text="Browse Image", command=process_image)
+browse_button.pack(pady=10)
+
+panel = tk.Label(root)
+panel.pack()
+
+root.mainloop()
